@@ -2,6 +2,14 @@ import lasio # http://pythonhosted.org/lasio/
 import pandas
 import work_with_dir
 import csv
+import math
+
+def CheckIsNan(x, default):
+    if math.isnan(x):
+        return default
+    else:
+        return x
+
 
 # Сохранение Las файлов в виде csv, для дальнейшей обработки в pandas
 
@@ -27,8 +35,6 @@ keys_dict = {kid_well:"well_name", kid_start:"start_m", kid_end:"stop_m", kid_de
 main_dir = "D:\\NIPI\\machine learning\\tasks\\task 6\\Data\\las"
 format = ".LAS"
 res_files = work_with_dir.GetFilesInDir(main_dir, format)
-
-
 file = open(main_dir + "\\" + "example.csv", "w", newline="")
 keys = keys_dict.values()
 
@@ -47,6 +53,8 @@ for file_name in res_files:
     # получить список кривых и их описание
     n = int(len(l["DEPT"]))
     print(n)
+    default = l.well["NULL"].value
+    print(default)
     for i in range(n):
 
         # print("%s\t[%s]\t%s\t%s" % (
@@ -57,16 +65,16 @@ for file_name in res_files:
         d[keys_dict[kid_start]] = l.well["STRT"].value
         d[keys_dict[kid_end]] = l.well["STOP"].value
 
-        d[keys_dict[kid_depth]] = l[keys_dict[kid_depth]][i]
-        d[keys_dict[kid_aps]] = l[keys_dict[kid_aps]][i]
-        d[keys_dict[kid_rp]] = l[keys_dict[kid_rp]][i]
-        d[keys_dict[kid_kp]] = l[keys_dict[kid_kp]][i]
-        d[keys_dict[kid_kgl]] = l[keys_dict[kid_kgl]][i]
-        d[keys_dict[kid_kpr]] = l[keys_dict[kid_kpr]][i]
-        d[keys_dict[kid_kvo]] = l[keys_dict[kid_kvo]][i]
-        d[keys_dict[kid_kng]] = l[keys_dict[kid_kng]][i]
-        d[keys_dict[kid_lit]] = l[keys_dict[kid_lit]][i]
-        d[keys_dict[kid_sat]] = l[keys_dict[kid_sat]][i]
+        d[keys_dict[kid_depth]] = CheckIsNan(l[keys_dict[kid_depth]][i], default)
+        d[keys_dict[kid_aps]] = CheckIsNan(l[keys_dict[kid_aps]][i], default)
+        d[keys_dict[kid_rp]] = CheckIsNan(l[keys_dict[kid_rp]][i], default)
+        d[keys_dict[kid_kp]] = CheckIsNan(l[keys_dict[kid_kp]][i], default)
+        d[keys_dict[kid_kgl]] = CheckIsNan(l[keys_dict[kid_kgl]][i], default)
+        d[keys_dict[kid_kpr]] = CheckIsNan(l[keys_dict[kid_kpr]][i], default)
+        d[keys_dict[kid_kvo]] = CheckIsNan(l[keys_dict[kid_kvo]][i], default)
+        d[keys_dict[kid_kng]] = CheckIsNan(l[keys_dict[kid_kng]][i], default)
+        d[keys_dict[kid_lit]] = CheckIsNan(l[keys_dict[kid_lit]][i], default)
+        d[keys_dict[kid_sat]] = CheckIsNan(l[keys_dict[kid_sat]][i], default)
         dict_list.append(d)
     dict_writer.writerows(dict_list)
     break
