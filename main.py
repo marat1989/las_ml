@@ -40,6 +40,7 @@ ext_format = ".LAS"
 
 
 def create_csv_from_las():
+    """Загружает данные (LAS) из папки и формирует csv файл """
     las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
 
     keys_list = keys_dict.values()
@@ -48,16 +49,14 @@ def create_csv_from_las():
     dict_writer.writeheader()
 
     for las_file_name in las_files:
-        print("From file" + las_file_name)
+        print("Convert" + las_file_name)
 
         dict_list = []
         # инициализируем словарь и заполняем в соответсви с ласом
         l = lasio.read(las_dir + "\\" + las_file_name)
         # получить список кривых и их описание
         n = int(len(l["DEPT"]))
-        print(n)
         default = l.well["NULL"].value
-        print(default)
         for i in range(n):
             # print("%s\t[%s]\t%s\t%s" % (
             # curve.mnemonic, curve.unit, curve.value, curve.descr))
