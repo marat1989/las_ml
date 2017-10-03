@@ -5,10 +5,11 @@ import csv
 import math
 
 def CheckIsNan(x, default):
-    if math.isnan(x):
-        return default
-    else:
-        return x
+    # if math.isnan(x):
+    #     return default
+    # else:
+    #   return x
+    return x
 
 
 # Сохранение Las файлов в виде csv, для дальнейшей обработки в pandas
@@ -37,57 +38,52 @@ las_dir = data_dir + "\\las"
 csv_out_file = data_dir + "\\las_data.csv"
 ext_format = ".LAS"
 
-las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
 
-keys_list = keys_dict.values()
-csv_out_stream = open(csv_out_file, "w", newline="")
-dict_writer = csv.DictWriter(csv_out_stream, keys_list, delimiter=";")
-dict_writer.writeheader()
+def create_csv_from_las():
+    las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
 
-for las_file_name in las_files:
-    print("From file" + las_file_name)
+    keys_list = keys_dict.values()
+    csv_out_stream = open(csv_out_file, "w", newline="")
+    dict_writer = csv.DictWriter(csv_out_stream, keys_list, delimiter=";")
+    dict_writer.writeheader()
 
-    dict_list = []
-    # инициализируем словарь и заполняем в соответсви с ласом
-    l = lasio.read(las_dir + "\\" + las_file_name)
+    for las_file_name in las_files:
+        print("From file" + las_file_name)
+
+        dict_list = []
+        # инициализируем словарь и заполняем в соответсви с ласом
+        l = lasio.read(las_dir + "\\" + las_file_name)
+        # получить список кривых и их описание
+        n = int(len(l["DEPT"]))
+        print(n)
+        default = l.well["NULL"].value
+        print(default)
+        for i in range(n):
+            # print("%s\t[%s]\t%s\t%s" % (
+            # curve.mnemonic, curve.unit, curve.value, curve.descr))
+            #for curve in l.curves:
+            d = dict.fromkeys(keys_list)
+            d[keys_dict[kid_well]] = las_file_name[:-4]
+            d[keys_dict[kid_start]] = l.well[keys_dict[kid_start]].value
+            d[keys_dict[kid_end]] = l.well[keys_dict[kid_end]].value
+
+            d[keys_dict[kid_depth]] = CheckIsNan(l[keys_dict[kid_depth]][i], default)
+            d[keys_dict[kid_aps]] = CheckIsNan(l[keys_dict[kid_aps]][i], default)
+            d[keys_dict[kid_rp]] = CheckIsNan(l[keys_dict[kid_rp]][i], default)
+            d[keys_dict[kid_kp]] = CheckIsNan(l[keys_dict[kid_kp]][i], default)
+            d[keys_dict[kid_kgl]] = CheckIsNan(l[keys_dict[kid_kgl]][i], default)
+            d[keys_dict[kid_kpr]] = CheckIsNan(l[keys_dict[kid_kpr]][i], default)
+            d[keys_dict[kid_kvo]] = CheckIsNan(l[keys_dict[kid_kvo]][i], default)
+            d[keys_dict[kid_kng]] = CheckIsNan(l[keys_dict[kid_kng]][i], default)
+            d[keys_dict[kid_lit]] = CheckIsNan(l[keys_dict[kid_lit]][i], default)
+            d[keys_dict[kid_sat]] = CheckIsNan(l[keys_dict[kid_sat]][i], default)
+            dict_list.append(d)
+        dict_writer.writerows(dict_list)
+
+    print("end save csv")
+    csv_out_stream.close()
+
     # получить список кривых и их описание
-    n = int(len(l["DEPT"]))
-    print(n)
-    default = l.well["NULL"].value
-    print(default)
-    for i in range(n):
-        # print("%s\t[%s]\t%s\t%s" % (
-        # curve.mnemonic, curve.unit, curve.value, curve.descr))
-        #for curve in l.curves:
-        d = dict.fromkeys(keys_list)
-        d[keys_dict[kid_well]] = las_file_name[:-4]
-        d[keys_dict[kid_start]] = l.well[keys_dict[kid_start]].value
-        d[keys_dict[kid_end]] = l.well[keys_dict[kid_end]].value
-
-        d[keys_dict[kid_depth]] = CheckIsNan(l[keys_dict[kid_depth]][i], default)
-        d[keys_dict[kid_aps]] = CheckIsNan(l[keys_dict[kid_aps]][i], default)
-        d[keys_dict[kid_rp]] = CheckIsNan(l[keys_dict[kid_rp]][i], default)
-        d[keys_dict[kid_kp]] = CheckIsNan(l[keys_dict[kid_kp]][i], default)
-        d[keys_dict[kid_kgl]] = CheckIsNan(l[keys_dict[kid_kgl]][i], default)
-        d[keys_dict[kid_kpr]] = CheckIsNan(l[keys_dict[kid_kpr]][i], default)
-        d[keys_dict[kid_kvo]] = CheckIsNan(l[keys_dict[kid_kvo]][i], default)
-        d[keys_dict[kid_kng]] = CheckIsNan(l[keys_dict[kid_kng]][i], default)
-        d[keys_dict[kid_lit]] = CheckIsNan(l[keys_dict[kid_lit]][i], default)
-        d[keys_dict[kid_sat]] = CheckIsNan(l[keys_dict[kid_sat]][i], default)
-        dict_list.append(d)
-    dict_writer.writerows(dict_list)
-    break
-
-print("end save csv")
-csv_out_stream.close()
-
-import numpy as np
-import pandas as pd
-
-df = pd.read_csv(csv_out_file)
-print(df.head())
-
-# получить список кривых и их описание
-# for curve in l.curves:
-#    print("%s\t[%s]\t%s\t%s" % (
-#    curve.mnemonic, curve.unit, curve.value, curve.descr))
+    # for curve in l.curves:
+    #    print("%s\t[%s]\t%s\t%s" % (
+    #    curve.mnemonic, curve.unit, curve.value, curve.descr))
