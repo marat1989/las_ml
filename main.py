@@ -49,7 +49,7 @@ def create_csv_from_las():
     dict_writer.writeheader()
 
     for las_file_name in las_files:
-        print("Convert" + las_file_name)
+        print("Convert " + las_file_name)
 
         dict_list = []
         # инициализируем словарь и заполняем в соответсви с ласом
