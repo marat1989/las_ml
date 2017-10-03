@@ -32,7 +32,7 @@ keys_dict = {kid_well:"well_name", kid_start:"start_m", kid_end:"stop_m", kid_de
             kid_rp: "rp", kid_kp: "kp", kid_kgl: "kgl", kid_kpr: "kpr", kid_kvo: "kvo", kid_kng: "kng", kid_lit: "lit",
             kid_sat: "satur"}
 
-main_dir = "D:\\NIPI\\machine learning\\tasks\\task 6\\Data\\las"
+main_dir = "..\\tasks\\task 6\\Data\\las"
 format = ".LAS"
 res_files = work_with_dir.GetFilesInDir(main_dir, format)
 file = open(main_dir + "\\" + "example.csv", "w", newline="")
@@ -47,16 +47,12 @@ for file_name in res_files:
     dict_list = []
     # инициализируем словарь и заполняем в соответсви с ласом
     l = lasio.read(main_dir + "\\" + file_name)
-
-
-
     # получить список кривых и их описание
     n = int(len(l["DEPT"]))
     print(n)
     default = l.well["NULL"].value
     print(default)
     for i in range(n):
-
         # print("%s\t[%s]\t%s\t%s" % (
         # curve.mnemonic, curve.unit, curve.value, curve.descr))
         #for curve in l.curves:
