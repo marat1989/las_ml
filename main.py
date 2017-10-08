@@ -14,18 +14,31 @@ def CheckIsNan(x, default):
 
 # Сохранение Las файлов в виде csv, для дальнейшей обработки в pandas
 
+# Имя скважины
 kid_well = 0
+# Глубина начала анализа
 kid_start = kid_well + 1
+# Конечная глубина
 kid_end = kid_start + 1
+# Шаг по глубине
 kid_depth = kid_end + 1
+# Альфа ПС
 kid_aps = kid_depth + 1
+# Удельное электрическое сопротивление
 kid_rp = kid_aps + 1
+# Коэфициент пористости
 kid_kp = kid_rp + 1
+# Коэфициент глинистости
 kid_kgl = kid_kp + 1
+# Коэфициент проницаемости
 kid_kpr = kid_kgl + 1
+# Коэфициент водонасыщенности
 kid_kvo = kid_kpr + 1
+# Коэфициент нефтегазонаысщенности
 kid_kng = kid_kvo + 1
+# Литология
 kid_lit = kid_kng + 1
+# Насыщение
 kid_sat = kid_lit + 1
 
 
