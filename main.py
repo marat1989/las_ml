@@ -3,6 +3,7 @@ import pandas
 import work_with_dir
 import csv
 import math
+import numpy as np
 
 def CheckIsNan(x, default):
     # if math.isnan(x):
@@ -94,6 +95,8 @@ def create_csv_from_las():
 
     print("end save csv")
     csv_out_stream.close()
+
+
 
     # получить список кривых и их описание
     # for curve in l.curves:
