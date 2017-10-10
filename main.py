@@ -48,14 +48,17 @@ keys_dict = {kid_well:"well_name", kid_start:"STRT", kid_end:"STOP", kid_depth: 
             kid_sat: "satur"}
 
 data_dir = "..\\tasks\\task 6\\Data"
-las_dir = data_dir + "\\las"
-csv_out_file = data_dir + "\\las_data.csv"
-ext_format = ".LAS"
+#las_dir = data_dir + "\\las"
+ext_format = '.las'
 
 
-def create_csv_from_las():
+def create_csv_from_las(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл """
+    csv_out_file = data_dir + "\\" + out_file_name
+
     las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
+    print('las_files:', las_files)
+    print('las_dir:', las_dir)
 
     keys_list = keys_dict.values()
     csv_out_stream = open(csv_out_file, "w", newline="")
@@ -95,6 +98,24 @@ def create_csv_from_las():
 
     print("end save csv")
     csv_out_stream.close()
+
+petrel_out_file_name = "petrel_out.csv"
+csv_petrel_out_full_path = data_dir + "\\" + petrel_out_file_name
+
+las_out_file_name = "las_out.csv"
+csv_las_out_full_path = data_dir + "\\" + las_out_file_name
+
+if __name__ == "__main__":
+
+    # Для ковертации папки petrel
+    # print('start create csv from petrel')
+    # petrel_dir = data_dir + "\\" + 'petrel'
+    # create_csv_from_las(petrel_dir, petrel_out_file_name)
+
+    # для конвертации папки las
+    print('start create_csv from las')
+    las_dir = data_dir + "\\" + 'las'
+    create_csv_from_las(las_dir, las_out_file_name)
 
 
 
