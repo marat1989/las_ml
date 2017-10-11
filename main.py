@@ -17,8 +17,10 @@ def CheckIsNan(x, default):
 
 # Имя скважины
 kid_well = 0
+# Кодовой имя (для того чтобы объединить сперфорациями )
+kid_well_dop_id = kid_well + 1
 # Глубина начала анализа
-kid_start = kid_well + 1
+kid_start = kid_well_dop_id + 1
 # Конечная глубина
 kid_end = kid_start + 1
 # Шаг по глубине
@@ -43,9 +45,10 @@ kid_lit = kid_kng + 1
 kid_sat = kid_lit + 1
 
 
+
 keys_dict = {kid_well:"well_name", kid_start:"STRT", kid_end:"STOP", kid_depth: "DEPT", kid_aps: "aps",
             kid_rp: "rp", kid_kp: "kp", kid_kgl: "kgl", kid_kpr: "kpr", kid_kvo: "kvo", kid_kng: "kng", kid_lit: "lit",
-            kid_sat: "satur"}
+            kid_sat: "satur", kid_well_dop_id: 'UWI'}
 
 data_dir = "..\\tasks\\task 6\\Data"
 #las_dir = data_dir + "\\las"
@@ -80,19 +83,20 @@ def create_csv_from_las(las_dir, out_file_name):
             #for curve in l.curves:
             d = dict.fromkeys(keys_list)
             d[keys_dict[kid_well]] = las_file_name[:-4]
+            d[keys_dict[kid_well_dop_id]] = l.well[keys_dict[kid_well_dop_id]].value
             d[keys_dict[kid_start]] = l.well[keys_dict[kid_start]].value
             d[keys_dict[kid_end]] = l.well[keys_dict[kid_end]].value
 
-            d[keys_dict[kid_depth]] = CheckIsNan(l[keys_dict[kid_depth]][i], default)
-            d[keys_dict[kid_aps]] = CheckIsNan(l[keys_dict[kid_aps]][i], default)
-            d[keys_dict[kid_rp]] = CheckIsNan(l[keys_dict[kid_rp]][i], default)
-            d[keys_dict[kid_kp]] = CheckIsNan(l[keys_dict[kid_kp]][i], default)
-            d[keys_dict[kid_kgl]] = CheckIsNan(l[keys_dict[kid_kgl]][i], default)
-            d[keys_dict[kid_kpr]] = CheckIsNan(l[keys_dict[kid_kpr]][i], default)
-            d[keys_dict[kid_kvo]] = CheckIsNan(l[keys_dict[kid_kvo]][i], default)
-            d[keys_dict[kid_kng]] = CheckIsNan(l[keys_dict[kid_kng]][i], default)
-            d[keys_dict[kid_lit]] = CheckIsNan(l[keys_dict[kid_lit]][i], default)
-            d[keys_dict[kid_sat]] = CheckIsNan(l[keys_dict[kid_sat]][i], default)
+            d[keys_dict[kid_depth]] = l[keys_dict[kid_depth]][i]
+            d[keys_dict[kid_aps]] = l[keys_dict[kid_aps]][i]
+            d[keys_dict[kid_rp]] = l[keys_dict[kid_rp]][i]
+            d[keys_dict[kid_kp]] = l[keys_dict[kid_kp]][i]
+            d[keys_dict[kid_kgl]] = l[keys_dict[kid_kgl]][i]
+            d[keys_dict[kid_kpr]] = l[keys_dict[kid_kpr]][i]
+            d[keys_dict[kid_kvo]] = l[keys_dict[kid_kvo]][i]
+            d[keys_dict[kid_kng]] = l[keys_dict[kid_kng]][i]
+            d[keys_dict[kid_lit]] = l[keys_dict[kid_lit]][i]
+            d[keys_dict[kid_sat]] = l[keys_dict[kid_sat]][i]
             dict_list.append(d)
         dict_writer.writerows(dict_list)
 
