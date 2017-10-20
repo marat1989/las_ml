@@ -113,6 +113,23 @@ def cut_data_frame_by_satur(well_las_data):
     return res, True
 
 
+def check_nan_in_data_frame(well_las_data, check_columns, limit=10):
+    rows_count = well_las_data.count().max()
+    for col in check_columns:
+        jd = well_las_data[[col]].isnull()
+        nan_cnt = 0
+        is_bad_data = False
+        for i in range(0, rows_count):
+            if (jd.iloc[i, 0]) and (well_las_data.iloc[i, 12] > 0):
+                nan_cnt = nan_cnt + 1
+            else:
+                nan_cnt = 0
+            if nan_cnt / rows_count > limit / 100.0:
+                return [], False
+
+    return well_las_data, True
+
+
 petrel_out_file_name = "petrel_out.csv"
 csv_petrel_out_full_path = data_dir + "\\" + petrel_out_file_name
 
