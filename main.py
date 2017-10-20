@@ -103,6 +103,16 @@ def create_csv_from_las(las_dir, out_file_name):
     print("end save csv")
     csv_out_stream.close()
 
+def cut_data_frame_by_satur(well_las_data):
+    cutted = well_las_data[well_las_data['satur'] > 0]
+    if cutted.empty:
+        return [], False
+    h_start = cutted.iloc[0]['DEPT']
+    h_end = cutted.iloc[len(cutted) - 1]['DEPT']
+    res = well_las_data[(well_las_data['DEPT'] >= h_start) & (well_las_data['DEPT'] <= h_end)]
+    return res, True
+
+
 petrel_out_file_name = "petrel_out.csv"
 csv_petrel_out_full_path = data_dir + "\\" + petrel_out_file_name
 
