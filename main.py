@@ -131,14 +131,15 @@ def check_nan_in_data_frame(well_las_data, check_columns, limit=10):
     return well_las_data, True
 
 
-def convert_las_to_dev(well_las_data, path, ext, column_name):
+def convert_trace_to_dev(well_trace_data, path, ext):
     if os.path.exists(path) == False:
         os.mkdir(path)
 
-    if well_las_data.empty:
+    if well_trace_data.empty:
         return
-    first_row = well_las_data.iloc[0]
-    filename = path + column_name + "_" + first_row['well_name'] + "." + ext
+
+    first_row = well_trace_data.iloc[0]
+    filename = path + first_row['well_name'] + "." + ext
     f = open(filename, 'w')
     f.write("# WELL TRACE FROM PETREL")
     f.write("\n# WELL NAME:  ")
@@ -165,13 +166,12 @@ def convert_las_to_dev(well_las_data, path, ext, column_name):
         "\n       MD              X              Y             Z           TVD           DX           DY          AZIM          INCL          DLS")
     f.write(
         "\n#======================================================================================================================================")
-    for idx, row in well_las_data.iterrows():
-        if str(row[column_name]) != "nan":
-            f.write("\n " + str(row['DEPT']))
-            f.write("   " + str(row['X']))
-            f.write(" " + str(row['Y']))
-            f.write(" " + str(row[column_name]))
-            f.write(" 0 0 0 0 0 0 ")
+    for idx, row in well_trace_data.iterrows():
+        f.write("\n " + str(row['MD']))
+        f.write("   " + str(row['X']))
+        f.write(" " + str(row['Y']))
+        f.write(" " + str(row['Z']))
+        f.write(" 0 0 0 0 0 0 ")
     f.close
 
 petrel_out_file_name = "petrel_out.csv"
