@@ -4,6 +4,7 @@ import work_with_dir
 import csv
 import math
 import numpy as np
+import os
 
 def CheckIsNan(x, default):
     # if math.isnan(x):
@@ -130,6 +131,49 @@ def check_nan_in_data_frame(well_las_data, check_columns, limit=10):
     return well_las_data, True
 
 
+def convert_trace_to_dev(well_trace_data, path, ext):
+    if os.path.exists(path) == False:
+        os.mkdir(path)
+
+    if well_trace_data.empty:
+        return
+
+    first_row = well_trace_data.iloc[0]
+    filename = path + first_row['well_name'] + "." + ext
+    f = open(filename, 'w')
+    f.write("# WELL TRACE FROM PETREL")
+    f.write("\n# WELL NAME:  ")
+    f.write(first_row['well_name'])
+    f.write("\n# WELL HEAD X-COORDINATE: ")
+    f.write(str(first_row['X']))
+    f.write(" (m)")
+    f.write("\n# WELL HEAD Y-COORDINATE: ")
+    f.write(str(first_row['Y']))
+    f.write(" (m)")
+
+    f.write("\n# WELL DATUM (KB, Kelly bushing, from MSL): 115.89000000 (m)")
+    f.write("\n# WELL TYPE:              UNKNOWN")
+    f.write("\n# MD AND TVD ARE REFERENCED (=0) AT WELL DATUM AND INCREASE DOWNWARDS")
+    f.write("\n# ANGLES ARE GIVEN IN DEGREES")
+    f.write("\n# XYZ TRACE IS GIVEN IN COORDINATE SYSTEM Urmanskoe [DBX,600001]")
+    f.write("\n# AZIMUTH REFERENCE TRUE NORTH")
+    f.write("\n# DX DY ARE GIVEN IN GRID NORTH IN m-UNITS")
+    f.write("\n# DEPTH (Z, tvd_z) GIVEN IN m-UNITS")
+
+    f.write(
+        "\n#======================================================================================================================================")
+    f.write(
+        "\n       MD              X              Y             Z           TVD           DX           DY          AZIM          INCL          DLS")
+    f.write(
+        "\n#======================================================================================================================================")
+    for idx, row in well_trace_data.iterrows():
+        f.write("\n " + str(row['MD']))
+        f.write("   " + str(row['X']))
+        f.write(" " + str(row['Y']))
+        f.write(" " + str(row['Z']))
+        f.write(" 0 0 0 0 0 0 ")
+    f.close
+
 petrel_out_file_name = "petrel_out.csv"
 csv_petrel_out_full_path = data_dir + "\\" + petrel_out_file_name
 
@@ -147,9 +191,6 @@ if __name__ == "__main__":
     print('start create_csv from las')
     las_dir = data_dir + "\\" + 'las'
     create_csv_from_las(las_dir, las_out_file_name)
-
-
-
     # получить список кривых и их описание
     # for curve in l.curves:
     #    print("%s\t[%s]\t%s\t%s" % (
