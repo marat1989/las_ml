@@ -160,18 +160,14 @@ def convert_trace_to_dev(well_trace_data, path, ext):
     f.write("\n# DX DY ARE GIVEN IN GRID NORTH IN m-UNITS")
     f.write("\n# DEPTH (Z, tvd_z) GIVEN IN m-UNITS")
 
-    f.write(
-        "\n#======================================================================================================================================")
-    f.write(
-        "\n       MD              X              Y             Z           TVD           DX           DY          AZIM          INCL          DLS")
-    f.write(
-        "\n#======================================================================================================================================")
+    f.write("\n#=====================================================")
+    f.write("\n       MD              X              Y             Z ")
+    f.write("\n#=====================================================")
     for idx, row in well_trace_data.iterrows():
         f.write("\n " + str(row['MD']))
         f.write("   " + str(row['X']))
         f.write(" " + str(row['Y']))
         f.write(" " + str(row['Z']))
-        f.write(" 0 0 0 0 0 0 ")
     f.close
 
 petrel_out_file_name = "petrel_out.csv"
