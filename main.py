@@ -114,9 +114,10 @@ def revert_format(src_las_dir, dst_las_dir):
 
     for las_file_name in las_files:
         src_las_file = src_las_dir + "\\" + las_file_name
-        dst_las_file = dst_las_dir + "\\" + las_file_name
         l = lasio.read(src_las_file)
-        print("Convert " + las_file_name)
+        dst_las_file = dst_las_dir + "\\" + l.well['WELL'].value
+
+        print("Convert " + las_file_name + " to " + l.well['WELL'].value)
         csv_out_stream = open(dst_las_file, "w", newline="")
         l.write(csv_out_stream, version=2.0, fmt="%10.5g")
         csv_out_stream.close
