@@ -104,6 +104,26 @@ def create_csv_from_las(las_dir, out_file_name):
     print("end save csv")
     csv_out_stream.close()
 
+def revert_format(src_las_dir, dst_las_dir):
+    """Загружает данные (LAS) из папки и формирует csv файл """
+    las_files = work_with_dir.GetFilesInDir(src_las_dir, ext_format)
+    print('las_files:', las_files)
+    print('las_dir:', src_las_dir)
+
+    keys_list = keys_dict.values()
+
+    for las_file_name in las_files:
+        src_las_file = src_las_dir + "\\" + las_file_name
+        dst_las_file = dst_las_dir + "\\" + las_file_name
+        l = lasio.read(src_las_file)
+        print("Convert " + las_file_name)
+        csv_out_stream = open(dst_las_file, "w", newline="")
+        l.write(csv_out_stream, version=2.0, fmt="%10.5g")
+        csv_out_stream.close
+
+
+    print("end save new las format")
+
 def cut_data_frame_by_satur(well_las_data):
     cutted = well_las_data[well_las_data['satur'] > 0]
     if cutted.empty:
@@ -185,8 +205,10 @@ if __name__ == "__main__":
 
     # для конвертации папки las
     print('start create_csv from las')
-    las_dir = data_dir + "\\" + 'las'
-    create_csv_from_las(las_dir, las_out_file_name)
+    src_las_dir = data_dir + "\\" + 'las'
+    dst_las_dir = data_dir + "\\" + 'las_v_2'
+    #create_csv_from_las(src_las_dir, las_out_file_name)
+    revert_format(src_las_dir, dst_las_dir)
     # получить список кривых и их описание
     # for curve in l.curves:
     #    print("%s\t[%s]\t%s\t%s" % (
