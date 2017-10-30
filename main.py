@@ -164,10 +164,12 @@ def convert_trace_to_dev(well_trace_data, path, ext):
     f.write("\n       MD              X              Y             Z ")
     f.write("\n#=====================================================")
     for idx, row in well_trace_data.iterrows():
-        f.write("\n " + str(row['MD']))
-        f.write("   " + str(row['X']))
-        f.write(" " + str(row['Y']))
-        f.write(" " + str(row['Z']))
+        if ((str(row['MD']) != 'nan') and (str(row['X']) != 'nan') and (str(row['Y']) != 'nan')
+            and (str(row['Z']) != 'nan')):
+            f.write("\n " + str(row['MD']))
+            f.write("   " + str(row['X']))
+            f.write(" " + str(row['Y']))
+            f.write(" " + str(row['Z']))
     f.close
 
 petrel_out_file_name = "petrel_out.csv"
