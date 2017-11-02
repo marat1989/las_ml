@@ -104,6 +104,37 @@ def create_csv_from_las(las_dir, out_file_name):
     print("end save csv")
     csv_out_stream.close()
 
+def create_well_names_key(las_dir, out_file_name):
+    """Загружает данные (LAS) из папки и формирует csv файл,
+       с well_name и uwi"""
+    csv_out_file = data_dir + "\\" + out_file_name
+
+    las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
+    print('las_files:', las_files)
+    print('las_dir:', las_dir)
+
+    keys_list = ['well_name', 'well_name_uwi']
+    csv_out_stream = open(csv_out_file, "w", newline="")
+    dict_writer = csv.DictWriter(csv_out_stream, keys_list, delimiter=";")
+    dict_writer.writeheader()
+
+    for las_file_name in las_files:
+        print("Convert " + las_file_name)
+
+        dict_list = []
+        # инициализируем словарь и заполняем в соответсви с ласом
+        l = lasio.read(las_dir + "\\" + las_file_name)
+        # получить список кривых и их описание
+        d = {}
+        d['well_name'] = las_file_name[:-4]
+        d['well_name_uwi'] = l.well[keys_dict[kid_well_dop_id]].value
+        dict_list.append(d)
+        dict_writer.writerows(dict_list)
+
+    print("end save csv")
+    csv_out_stream.close()
+
+
 def revert_format(src_las_dir, dst_las_dir):
     """Загружает данные (LAS) из папки и формирует csv файл """
     las_files = work_with_dir.GetFilesInDir(src_las_dir, ext_format)
@@ -210,8 +241,11 @@ if __name__ == "__main__":
     print('start create_csv from las')
     src_las_dir = data_dir + "\\" + 'las'
     dst_las_dir = data_dir + "\\" + 'las_v_2'
-    #create_csv_from_las(src_las_dir, las_out_file_name)
-    revert_format(src_las_dir, dst_las_dir)
+    # create_csv_from_las(src_las_dir, las_out_file_name)
+    # revert_format(src_las_dir, dst_las_dir)
+    create_well_names_key(src_las_dir, 'well_name_key.csv')
+
+
     # получить список кривых и их описание
     # for curve in l.curves:
     #    print("%s\t[%s]\t%s\t%s" % (
