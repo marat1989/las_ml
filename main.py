@@ -13,7 +13,6 @@ def CheckIsNan(x, default):
     #   return x
     return x
 
-
 # Сохранение Las файлов в виде csv, для дальнейшей обработки в pandas
 
 # Имя скважины
@@ -44,8 +43,6 @@ kid_kng = kid_kvo + 1
 kid_lit = kid_kng + 1
 # Насыщение
 kid_sat = kid_lit + 1
-
-
 
 keys_dict = {kid_well:"well_name", kid_start:"STRT", kid_end:"STOP", kid_depth: "DEPT", kid_aps: "aps",
             kid_rp: "rp", kid_kp: "kp", kid_kgl: "kgl", kid_kpr: "kpr", kid_kvo: "kvo", kid_kng: "kng", kid_lit: "lit",
@@ -134,7 +131,6 @@ def cut_data_frame_by_satur(well_las_data):
     res = well_las_data[(well_las_data['DEPT'] >= h_start) & (well_las_data['DEPT'] <= h_end)]
     return res, True
 
-
 def check_nan_in_data_frame(well_las_data, check_columns, limit=10):
     rows_count = well_las_data.count().max()
     for col in check_columns:
@@ -150,7 +146,6 @@ def check_nan_in_data_frame(well_las_data, check_columns, limit=10):
                 return [], False
 
     return well_las_data, True
-
 
 def convert_trace_to_dev(well_trace_data, path, ext):
     if os.path.exists(path) == False:
