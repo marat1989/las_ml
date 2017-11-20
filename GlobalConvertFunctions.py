@@ -50,13 +50,15 @@ def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names):
             # получить список кривых и их описание
 
             exist_val = False
-            exist_values = dict.fromkeys(range(kid_calc, len(keys_list)))
+            exist_values = dict()
             for cur_id in range(kid_calc, len(keys_list)):
-                print('cur_id = ', cur_id)
+                # print('cur_id = ', cur_id)
                 exist_val = exist_val_in_list(keys_dict[cur_id], l.keys())
                 exist_values[keys_dict[cur_id]] = exist_val
                 if exist_val == False:
                     exist_val = exist_val
+
+            # print(exist_values)
 
             if exist_val:
                 n = int(len(l["DEPT"]))
@@ -74,6 +76,7 @@ def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names):
 
                     dict_list.append(d)
                 dict_writer.writerows(dict_list)
+                # print(dict_list)
                 convert_well = convert_well + 1
                 #         else:
                 #             print(l.keys())
