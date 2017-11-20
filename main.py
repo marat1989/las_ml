@@ -76,7 +76,7 @@ def load_and_convert_to_interp(dev_path, well_name):
         f_spline = interpolate.interp1d(abs, md, kind = 'slinear', bounds_error=False)
     return [f_spline, is_exist]
 
-def ConvertDataToLearning(real_data_na, dev_path, min_count_val_in_data, count_val):
+def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_data, count_val):
     well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
     x_values = []
     y_values = []
@@ -93,7 +93,7 @@ def ConvertDataToLearning(real_data_na, dev_path, min_count_val_in_data, count_v
         top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
         data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
         x_arr = data_well_by_bound['DEPT']
-        y_arr = data_well_by_bound['CILD']
+        y_arr = data_well_by_bound[param_name]
 
         # print ('length of array depth', len(x_arr))
         # print(len(x_arr), len(y_arr))
