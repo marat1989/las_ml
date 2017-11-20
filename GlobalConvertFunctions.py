@@ -81,7 +81,7 @@ def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names):
                 #         else:
                 #             print(l.keys())
             i_well = i_well + 1
-            break
+            
 
     print("create_csv_from_las end, i_well = ", i_well, ', convert_well = ', convert_well)
     csv_out_stream.close()
