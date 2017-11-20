@@ -52,6 +52,68 @@ data_dir = "..\\tasks\\task 6\\Data"
 #las_dir = data_dir + "\\las"
 ext_format = '.las'
 
+import re
+import os
+from scipy import interpolate
+def load_and_convert_to_interp(dev_path, well_name):
+    # print('dev_path, is_exist = ', dev_path)
+    is_exist = os.path.exists(dev_path + well_name + '.dev')
+    f_spline = None
+    if is_exist:
+        f = open(dev_path + well_name + '.dev', 'r')
+        well_num = 0
+        md = []
+        abs = []
+        for line in f.readlines():
+            if well_num > 16:
+                # list = line.split(' ')
+                # print(list)
+                numbers = re.findall(r'[-]?[0-9]+.[0-9]+', line)
+                md.append(float(numbers[0]))
+                abs.append(float(numbers[3]))
+            well_num = well_num +1
+        f.close()
+        f_spline = interpolate.interp1d(abs, md, kind = 'slinear', bounds_error=False)
+    return [f_spline, is_exist]
+
+def ConvertDataToLearning(real_data_na, dev_path, min_count_val_in_data, count_val):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+        [f_spline, dev_is_exist] = load_and_convert_to_interp(dev_path, well_name)
+        if (not dev_is_exist):
+            continue
+        bottom = f_spline(data_well['DEPTH_BOTTOM'].tolist()[0])
+        top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+        y_arr = data_well_by_bound['CILD']
+
+        # print ('length of array depth', len(x_arr))
+        # print(len(x_arr), len(y_arr))
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        h_start = data_well_by_bound['DEPT'].min()
+        h_end = data_well_by_bound['DEPT'].max()
+        # print(h_start, h_end, top, bottom)
+        h_step = (h_end - h_start) / count_val
+        x_temp = []
+        i = 0
+        while (i < count_val):
+            x_temp.append(float(f_spline(h_start + i * h_step)))
+            i = i + 1
+        x_values.append(x_temp)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+        well_count = well_count + 1
+    return [x_values, y_values, y_names]
 
 def create_csv_from_las(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл """
