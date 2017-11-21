@@ -77,6 +77,7 @@ def load_and_convert_to_interp(dev_path, well_name):
     return [f_spline, is_exist]
 
 from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_data, count_val):
     well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
     x_values = []
@@ -102,9 +103,13 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
         # print(len(x_arr), len(y_arr))
         if (len(x_arr) < min_count_val_in_data):
             continue
-            # масштабируем данные
-        scaler = MinMaxScaler()
-        y_arr = scaler.fit_transform(y_arr)
+        # масштабируем данные
+        # scaler = MinMaxScaler()
+        # y_arr = scaler.fit_transform(y_arr)
+
+        # логорифмируем данные
+        y_arr = np.log(y_arr)
+
 
         f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
         h_start = data_well_by_bound['DEPT'].min()
