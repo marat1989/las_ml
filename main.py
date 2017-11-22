@@ -108,20 +108,21 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
         # y_arr = scaler.fit_transform(y_arr)
 
         # логорифмируем данные
-        y_arr = np.log(y_arr)
+        # y_arr = np.log(y_arr)
 
-
-        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
-        h_start = data_well_by_bound['DEPT'].min()
-        h_end = data_well_by_bound['DEPT'].max()
-        # print(h_start, h_end, top, bottom)
-        h_step = (h_end - h_start) / count_val
-        x_temp = []
-        i = 0
-        while (i < count_val):
-            x_temp.append(float(f_spline(h_start + i * h_step)))
-            i = i + 1
-        x_values.append(x_temp)
+        # f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        # h_start = data_well_by_bound['DEPT'].min()
+        # h_end = data_well_by_bound['DEPT'].max()
+        # # print(h_start, h_end, top, bottom)
+        # h_step = (h_end - h_start) / count_val
+        # x_temp = []
+        # i = 0
+        # while (i < count_val):
+        #     x_temp.append(float(f_spline(h_start + i * h_step)))
+        #     i = i + 1
+        # x_values.append(x_temp)
+        # y_values.append(data_well['WC'].tolist()[0])
+        x_values.append(data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist())
         y_values.append(data_well['WC'].tolist()[0])
         y_names.append(data_well['WELL_NAME'].tolist()[0])
         well_count = well_count + 1
