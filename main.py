@@ -122,7 +122,9 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
         #     i = i + 1
         # x_values.append(x_temp)
         # y_values.append(data_well['WC'].tolist()[0])
-        x_values.append(data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist())
+        data_well_by_bound[param_name]
+        x_val = data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist()
+        x_values.append(x_val)
         y_values.append(data_well['WC'].tolist()[0])
         y_names.append(data_well['WELL_NAME'].tolist()[0])
         well_count = well_count + 1
