@@ -1,6 +1,6 @@
 % Построить признаки по спектрограммам сигналов (решение задачи CardioQVARK - Дьяконов Александр, ВМК МГУ)
 
-m_train = csvread('data_info_train_spectrogram.csv')
+m_train = csvread('data_fake_aps_train_spectrogram.csv')
 length(m_train)
 [rows, cols] = size(m_train)
 
@@ -14,9 +14,9 @@ for i=1:rows
 end;
 F = F';
 y = m_train(:,1);
-dlmwrite('features_spectrogram_spectrogram.csv', [y F(:,:)])
+dlmwrite('data_fake_aps_train_spectrogram_out.csv', [y F(:,:)])
 
-m_train = csvread('data_info_hold_spectrogram.csv')
+m_train = csvread('data_fake_aps_hold_spectrogram.csv')
 length(m_train)
 [rows, cols] = size(m_train)
 F = [];
@@ -29,4 +29,4 @@ for i=1:rows
 end;
 F = F';
 y = m_train(:,1);
-dlmwrite('features_spectrogram_hold.csv', [y F(:,:)])
+dlmwrite('data_fake_aps_hold_spectrogram_out.csv', [y F(:,:)])
