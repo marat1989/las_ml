@@ -52,6 +52,87 @@ data_dir = "..\\tasks\\task 6\\Data"
 #las_dir = data_dir + "\\las"
 ext_format = '.las'
 
+import re
+import os
+from scipy import interpolate
+def load_and_convert_to_interp(dev_path, well_name):
+    # print('dev_path, is_exist = ', dev_path)
+    is_exist = os.path.exists(dev_path + well_name + '.dev')
+    f_spline = None
+    if is_exist:
+        f = open(dev_path + well_name + '.dev', 'r')
+        well_num = 0
+        md = []
+        abs = []
+        for line in f.readlines():
+            if well_num > 16:
+                # list = line.split(' ')
+                # print(list)
+                numbers = re.findall(r'[-]?[0-9]+.[0-9]+', line)
+                md.append(float(numbers[0]))
+                abs.append(float(numbers[3]))
+            well_num = well_num +1
+        f.close()
+        f_spline = interpolate.interp1d(abs, md, kind = 'slinear', bounds_error=False)
+    return [f_spline, is_exist]
+
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_data, count_val):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+        [f_spline, dev_is_exist] = load_and_convert_to_interp(dev_path, well_name)
+        if (not dev_is_exist):
+            continue
+        bottom = f_spline(data_well['DEPTH_BOTTOM'].tolist()[0])
+        top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+        y_arr = data_well_by_bound[param_name]
+
+
+
+        # print ('length of array depth', len(x_arr))
+        # print(len(x_arr), len(y_arr))
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+        # масштабируем данные
+        # scaler = MinMaxScaler()
+        # y_arr = scaler.fit_transform(y_arr)
+
+        # логорифмируем данные
+        # y_arr = np.log(y_arr)
+
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        h_start = data_well_by_bound['DEPT'].min()
+        h_end = data_well_by_bound['DEPT'].max()
+        # print(h_start, h_end, top, bottom)
+        h_step = (h_end - h_start) / count_val
+        x_temp = []
+        i = 0
+        while (i < count_val):
+            x_temp.append(float(f_spline(h_start + i * h_step)))
+            i = i + 1
+        x_values.append(x_temp)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+
+        #scaler = MinMaxScaler(feature_range=(0, 1))
+        #data_well_by_bound[param_name] = scaler.fit_transform(data_well_by_bound[param_name])
+        #x_val = data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist()
+        #x_values.append(x_val)
+        #y_values.append(data_well['WC'].tolist()[0])
+        #y_names.append(data_well['WELL_NAME'].tolist()[0])
+        well_count = well_count + 1
+    print('end ConvertDataToLearning')
+    return [x_values, y_values, y_names]
 
 def create_csv_from_las(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл """
@@ -132,7 +213,7 @@ def create_well_names_key(las_dir, out_file_name):
     csv_out_stream.close()
 
 
-def revert_format(src_las_dir, dst_las_dir):
+def revert_format(src_las_dir, dst_las_dir, save_names):
     """Загружает данные (LAS) из папки и формирует csv файл """
     las_files = work_with_dir.GetFilesInDir(src_las_dir, ext_format)
     print('las_files:', las_files)
@@ -147,8 +228,21 @@ def revert_format(src_las_dir, dst_las_dir):
 
         print("Convert " + las_file_name + " to " + l.well['WELL'].value)
         csv_out_stream = open(dst_las_file, "w", newline="")
+        delete_list = []
+        for curve in l.curves:
+            # print ('Curve =', curve.mnemonic)
+            name_exist = False
+            for save_name in save_names:
+                if (save_name == curve.mnemonic):
+                    name_exist = True
+            if name_exist == False:
+                delete_list.append(curve.mnemonic)
+
+        for del_elem in delete_list:
+            l.delete_curve(del_elem)
         l.write(csv_out_stream, version=2.0, fmt="%10.5g")
         csv_out_stream.close
+        # break
 
 
     print("end save new las format")
@@ -238,8 +332,13 @@ if __name__ == "__main__":
     dst_las_dir = data_dir + "\\" + 'las_v_2'
     # create_csv_from_las(src_las_dir, las_out_file_name)
     # revert_format(src_las_dir, dst_las_dir)
-    create_well_names_key(src_las_dir, 'well_name_key.csv')
+    # create_well_names_key(src_las_dir, 'well_name_key.csv')
 
+    src_las_dir = data_dir + '/gis_data/LAS'
+    dst_las_dir = data_dir + '/gis_data/LAS_CORRECT'
+
+    params_name = ['DEPT', 'CILD', 'GZ7', 'KINT', 'APS']
+    revert_format(src_las_dir, dst_las_dir, params_name)
 
     # получить список кривых и их описание
     # for curve in l.curves:
