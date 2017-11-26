@@ -55,6 +55,33 @@ ext_format = '.las'
 import re
 import os
 from scipy import interpolate
+
+import numpy as np
+def calc_stat(x_list):
+    x_mean = np.mean(x_list)
+    x_std = np.std(x_list)
+    x_a0 = part_of_intersection(x_list, 0.)
+    x_a_mean = part_of_intersection(x_list, x_mean)
+    x_a_mean_std = part_of_intersection(x_list, x_mean + x_std)
+    return [x_mean, x_std, x_a0, x_a_mean, x_a_mean_std]
+
+def part_of_intersection(src_list, value):
+    count_intersect = 0.
+    for x in src_list:
+        if (x >  value):
+            count_intersect = count_intersect + 1
+    if (count_intersect == 0):
+        res = 0
+    else:
+        res = len(src_list)/count_intersect
+    return res
+
+def convert_list_to_diff(src_list):
+    dst_list = []
+    for i in range(1, len(src_list)):
+        dst_list.append(src_list[i] - src_list[i - 1])
+    return dst_list
+
 def load_and_convert_to_interp(dev_path, well_name):
     # print('dev_path, is_exist = ', dev_path)
     is_exist = os.path.exists(dev_path + well_name + '.dev')
@@ -77,7 +104,7 @@ def load_and_convert_to_interp(dev_path, well_name):
     return [f_spline, is_exist]
 
 from sklearn.preprocessing import MinMaxScaler
-import numpy as np
+
 def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_data, count_val):
     well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
     x_values = []
@@ -167,6 +194,95 @@ def ConvertDataToLearningByStdParams(real_data_na, param_name, dev_path, min_cou
     print('end ConvertDataToLearning')
     print('x_values_length = ', len(x_values))
     return [x_values, y_values, y_names]
+
+def ConvertDataToLearningStatParamsWithDiff(real_data_na, param_name, dev_path, min_count_val_in_data, count_val):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+        [f_spline, dev_is_exist] = load_and_convert_to_interp(dev_path, well_name)
+        if (not dev_is_exist):
+            continue
+        bottom = f_spline(data_well['DEPTH_BOTTOM'].tolist()[0])
+        top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+        y_arr = data_well_by_bound[param_name]
+
+
+
+        # print ('length of array depth', len(x_arr))
+        # print(len(x_arr), len(y_arr))
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+        # масштабируем данные
+        # scaler = MinMaxScaler()
+        # y_arr = scaler.fit_transform(y_arr)
+
+        # логорифмируем данные
+        # y_arr = np.log(y_arr)
+
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        h_start = data_well_by_bound['DEPT'].min()
+        h_end = data_well_by_bound['DEPT'].max()
+        # print(h_start, h_end, top, bottom)
+        h_step = (h_end - h_start) / count_val
+        x_stat = []
+        x_temp = []
+        x_temp_diff = []
+        x_temp_diff_abs = []
+        i = 0
+        while (i < count_val):
+            x_temp.append(float(f_spline(h_start + i * h_step)))
+            i = i + 1
+
+        x_temp_diff = convert_list_to_diff(x_temp)
+        x_temp_diff_abs = list(np.abs(x_temp_diff))
+
+        [x_mean, x_std, x_a_0, x_a_std, x_a_mean_std] = calc_stat(x_temp)
+        [x_mean_d, x_std_d, x_a_0_d, x_a_std_d, x_a_mean_std_d] = calc_stat(x_temp_diff)
+        [x_mean_abs, x_std_abs, x_a_0_abs, x_a_std_abs, x_a_mean_std_abs] = calc_stat(x_temp_diff_abs)
+
+        x_stat.append(x_mean)
+        x_stat.append(x_std)
+        x_stat.append(x_a_0)
+        x_stat.append(x_a_std)
+        x_stat.append(x_a_mean_std)
+
+        x_stat.append(x_mean_d)
+        x_stat.append(x_std_d)
+        x_stat.append(x_a_0_d)
+        x_stat.append(x_a_std_d)
+        x_stat.append(x_a_mean_std_d)
+
+        x_stat.append(x_mean_abs)
+        x_stat.append(x_std_abs)
+        x_stat.append(x_a_0_abs)
+        x_stat.append(x_a_std_abs)
+        x_stat.append(x_a_mean_std_abs)
+
+
+
+        x_values.append(x_stat)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+
+        #scaler = MinMaxScaler(feature_range=(0, 1))
+        #data_well_by_bound[param_name] = scaler.fit_transform(data_well_by_bound[param_name])
+        #x_val = data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist()
+        #x_values.append(x_val)
+        #y_values.append(data_well['WC'].tolist()[0])
+        #y_names.append(data_well['WELL_NAME'].tolist()[0])
+        well_count = well_count + 1
+    print('end ConvertDataToLearning')
+    return [x_values, y_values, y_names]
+
+
 
 def create_csv_from_las(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл """
