@@ -134,6 +134,40 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
     print('end ConvertDataToLearning')
     return [x_values, y_values, y_names]
 
+# Ковертирует в расчет по данным перцентилей, максимальному и минимальному
+def ConvertDataToLearningByStdParams(real_data_na, param_name, dev_path, min_count_val_in_data):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+        [f_spline, dev_is_exist] = load_and_convert_to_interp(dev_path, well_name)
+        if (not dev_is_exist):
+            continue
+        bottom = f_spline(data_well['DEPTH_BOTTOM'].tolist()[0])
+        top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+
+        #scaler = MinMaxScaler(feature_range=(0, 1))
+        #data_well_by_bound[param_name] = scaler.fit_transform(data_well_by_bound[param_name])
+        x_val = data_well_by_bound[param_name].describe(percentiles=[0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95]).tolist()
+
+        x_values.append(x_val)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+        well_count = well_count + 1
+    print('end ConvertDataToLearning')
+    print('x_values_length = ', len(x_values))
+    return [x_values, y_values, y_names]
+
 def create_csv_from_las(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл """
     csv_out_file = data_dir + "\\" + out_file_name
