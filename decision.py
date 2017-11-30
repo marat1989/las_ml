@@ -79,7 +79,7 @@ def create_csv_from_las(las_dir, keys_dict_temp):
     return csv_out_file
 
 
-def to_scale_interpolate_data(full_data, analized_curve_name, scale_value_count = 100,
+def to_scale_interpolate_data(full_data, analized_curve_name, dev_path, scale_value_count = 100,
                               is_have_target_value = False):
     well_name_list = full_data[keys_dict_temp[kid_well]].value_counts().index.tolist()
     x_values = []
@@ -93,8 +93,11 @@ def to_scale_interpolate_data(full_data, analized_curve_name, scale_value_count 
         if well_count % 500 == 0:
             print(' ', well_count, ' of ', len(well_name_list))
         data_well = full_data[full_data[keys_dict_temp[kid_well]] == well_name]
-        bottom = data_well[kid_bottom_str].tolist()[0]
-        top = data_well[kid_top_str].tolist()[0]
+        f_spline = load_and_convert_to_interp(dev_path, well_name)
+        if f_spline is None:
+            continue
+        bottom = f_spline(data_well[kid_bottom_str].tolist()[0])
+        top = f_spline(data_well[kid_top_str].tolist()[0])
         data_well_by_bound = data_well[(data_well[keys_dict_temp[kid_depth]] >= top)
                                        & (data_well[keys_dict_temp[kid_depth]] <= bottom)]
         x_arr = data_well_by_bound[keys_dict_temp[kid_depth]]
@@ -121,6 +124,28 @@ def to_scale_interpolate_data(full_data, analized_curve_name, scale_value_count 
     print(' loop end')
     return x_values, well_names, y_values
 
+import lasio
+import re
+def load_and_convert_to_interp(dev_path, well_name):
+    if os.path.exists(dev_path + well_name + '.dev') == False:
+        return None
+
+    f = open(dev_path + well_name + '.dev', 'r')
+    well_num = 0
+    md = []
+    abs = []
+    for line in f.readlines():
+        if well_num > 16:
+            # list = line.split(' ')
+            # print(list)
+            numbers = re.findall(r'[-]?[0-9]+.[0-9]+', line)
+            md.append(float(numbers[0]))
+            abs.append(float(numbers[3]))
+        well_num = well_num +1
+    f.close()
+    f_spline = interpolate.interp1d(abs, md, kind = 'slinear', bounds_error=False)
+    return f_spline
+
 def generate_x_values(las_dir, curve_name):
     full_input_data_file_name = las_dir + '\\' + input_csv_data
     output_data_file_name =  las_dir + '\\' + input_csv_data_for_model
@@ -140,6 +165,7 @@ def generate_x_values(las_dir, curve_name):
     full_input_data = pd.merge(full_input_data, bottom, on=keys_dict_temp[kid_well])
 
     x_vals, well_names, y_vals = to_scale_interpolate_data(full_input_data, curve_name,
+                                                           dev_path=las_dir + '\\dev\\',
                                                            is_have_target_value=is_have_wc)
     save_x = pd.DataFrame(x_vals, columns=[curve_name + str(z) for z in range(0, len(x_vals[0]))])
     save_y = pd.DataFrame(y_vals, columns=[kid_wc_str])
@@ -183,9 +209,9 @@ def classify_neural(las_dir, input_df):
 
 def classify(path):
 
-    print('Start convert las to csv. Path:' + path)
-    res_file = create_csv_from_las(path, keys_dict_temp)
-    print('End convert las to csv. Result: ' + res_file)
+    # print('Start convert las to csv. Path:' + path)
+    # res_file = create_csv_from_las(path, keys_dict_temp)
+    # print('End convert las to csv. Result: ' + res_file)
 
     print('Generate train/test data')
     res_file = generate_x_values(path, keys_dict_temp[kid_aps])
@@ -199,4 +225,4 @@ def classify(path):
 
 
 if __name__ == "__main__":
-    classify('C:\\WORK\\ML\\tasks\\task 6\\data\\fake_las_cutted')
+    classify('C:\\WORK\\ML\\result')
