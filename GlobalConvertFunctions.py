@@ -18,7 +18,7 @@ def exist_val_in_list(val, list):
     return val_exist
 
 
-def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names):
+def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names=[]):
     """Загружает данные (LAS) из папки и формирует csv файл """
     csv_out_file = out_file_name
 
@@ -42,7 +42,12 @@ def create_csv_from_las(las_dir, out_file_name, keys_dict, wc_well_names):
         # инициализируем словарь и заполняем в соответсвии с ласом
         dict_list = []
         well_name = las_file_name[:-4]
-        is_well_wc = len(list(filter(lambda x: well_name in x, wc_well_names)))
+        print(well_name)
+        is_well_wc = 0
+        if wc_well_names == []:
+            is_well_wc = 1
+        else:
+            is_well_wc = len(list(filter(lambda x: well_name in x, wc_well_names)))
         if is_well_wc == 1:
 
             l = lasio.read(las_dir + "\\" + las_file_name)
