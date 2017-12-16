@@ -332,6 +332,42 @@ def create_csv_from_las(las_dir, out_file_name):
     print("end save csv")
     csv_out_stream.close()
 
+def create_csv_from_las_modeling(las_dir, out_file_name):
+    """Загружает данные (LAS) из папки и формирует csv файл """
+    csv_out_file = data_dir + "\\" + out_file_name
+
+    las_files = work_with_dir.GetFilesInDir(las_dir, ext_format)
+    print('las_files:', las_files)
+    print('las_dir:', las_dir)
+
+    keys_list = ['well_name', 'DEPT', 'APS']
+    csv_out_stream = open(csv_out_file, "w", newline="")
+    dict_writer = csv.DictWriter(csv_out_stream, keys_list, delimiter=";")
+    dict_writer.writeheader()
+
+    for las_file_name in las_files:
+        print("Convert " + las_file_name)
+
+        dict_list = []
+        # инициализируем словарь и заполняем в соответсви с ласом
+        l = lasio.read(las_dir + "\\" + las_file_name)
+        # получить список кривых и их описание
+        count_keys = len(l.curves.keys())
+        print(l.curves.keys())
+        if (count_keys > 12):
+            n = int(len(l['DEPT:1']))
+            default = l.well["NULL"].value
+            for i in range(n):
+                d = dict.fromkeys(keys_list)
+                d['well_name'] = las_file_name[:-4]
+                d['DEPT'] = l['DEPT:1'][i]
+                d['APS'] = l['aps:2'][i]
+                dict_list.append(d)
+            dict_writer.writerows(dict_list)
+
+    print("end save csv")
+    csv_out_stream.close()
+
 def create_well_names_key(las_dir, out_file_name):
     """Загружает данные (LAS) из папки и формирует csv файл,
        с well_name и uwi"""
