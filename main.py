@@ -282,6 +282,54 @@ def ConvertDataToLearningStatParamsWithDiff(real_data_na, param_name, dev_path, 
     print('end ConvertDataToLearning')
     return [x_values, y_values, y_names]
 
+def ConvertDataToLearningPerforation(real_data_na, param_name, min_count_val_in_data, count_val):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+
+        bottom = data_well['DEPTH_BOTTOM'].tolist()[0]
+        top = data_well['DEPTH_TOP'].tolist()[0]
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+        y_arr = data_well_by_bound[param_name]
+
+
+
+        # print ('length of array depth', len(x_arr))
+        # print(len(x_arr), len(y_arr))
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+        # масштабируем данные
+        # scaler = MinMaxScaler()
+        # y_arr = scaler.fit_transform(y_arr)
+
+        # логорифмируем данные
+        # y_arr = np.log(y_arr)
+
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        h_start = data_well_by_bound['DEPT'].min()
+        h_end = data_well_by_bound['DEPT'].max()
+        # print(h_start, h_end, top, bottom)
+        h_step = (h_end - h_start) / count_val
+        x_temp = []
+        i = 0
+        while (i < count_val):
+            x_temp.append(float(f_spline(h_start + i * h_step)))
+            i = i + 1
+        x_values.append(x_temp)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+        well_count = well_count + 1
+    print('end ConvertDataToLearning')
+    return [x_values, y_values, y_names]
+
+
 
 
 def create_csv_from_las(las_dir, out_file_name):
