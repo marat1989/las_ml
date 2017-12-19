@@ -308,6 +308,7 @@ def ConvertDataToLearningPerforation(real_data_na, param_name, min_count_val_in_
         # print ('length of array depth', len(x_arr))
         # print(len(x_arr), len(y_arr))
         if (len(x_arr) < min_count_val_in_data):
+            print('for well = ', well_name, ' len = ', len(x_arr))
             continue
         # масштабируем данные
         # scaler = MinMaxScaler()
