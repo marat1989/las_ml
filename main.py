@@ -122,8 +122,6 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
             continue
         bottom = f_spline(data_well['DEPTH_BOTTOM'].tolist()[0])
         top = f_spline(data_well['DEPTH_TOP'].tolist()[0])
-        top_values.append(top)
-        bottom_values.append(bottom)
         data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
         x_arr = data_well_by_bound['DEPT']
         y_arr = data_well_by_bound[param_name]
@@ -141,7 +139,9 @@ def ConvertDataToLearning(real_data_na, param_name, dev_path, min_count_val_in_d
         # логорифмируем данные
         # y_arr = np.log(y_arr)
 
-        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        top_values.append(top)
+        bottom_values.append(bottom)
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='quadratic')
         h_start = data_well_by_bound['DEPT'].min()
         h_end = data_well_by_bound['DEPT'].max()
         # print(h_start, h_end, top, bottom)
