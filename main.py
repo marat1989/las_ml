@@ -300,23 +300,20 @@ def ConvertDataToLearningPerforation(real_data_na, param_name, min_count_val_in_
         bottom = data_well['DEPTH_BOTTOM'].tolist()[0]
         top = data_well['DEPTH_TOP'].tolist()[0]
         data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
-        x_arr = data_well_by_bound['DEPT']
-        y_arr = data_well_by_bound[param_name]
+        data_well_by_bound.sort(['DEPT'], ascending=[False])
+        x_arr = data_well_by_bound['DEPT'].tolist()
+        y_arr = data_well_by_bound[param_name].tolist()
 
 
 
         # print ('length of array depth', len(x_arr))
-        # print(len(x_arr), len(y_arr))
+
         if (len(x_arr) < min_count_val_in_data):
             print('for well = ', well_name, ' len = ', len(x_arr))
             continue
-        # масштабируем данные
-        # scaler = MinMaxScaler()
-        # y_arr = scaler.fit_transform(y_arr)
 
-        # логорифмируем данные
-        # y_arr = np.log(y_arr)
-
+        #print(x_arr)
+        #print('well_name_uwi: ', well_name)
         f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
         h_start = data_well_by_bound['DEPT'].min()
         h_end = data_well_by_bound['DEPT'].max()
