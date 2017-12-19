@@ -300,7 +300,7 @@ def ConvertDataToLearningPerforation(real_data_na, param_name, min_count_val_in_
         bottom = data_well['DEPTH_BOTTOM'].tolist()[0]
         top = data_well['DEPTH_TOP'].tolist()[0]
         data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
-        data_well_by_bound.sort(['DEPT'], ascending=[False])
+        # data_well_by_bound.sort(['DEPT'], ascending=[False])
         x_arr = data_well_by_bound['DEPT'].tolist()
         y_arr = data_well_by_bound[param_name].tolist()
 
