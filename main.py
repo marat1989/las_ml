@@ -331,6 +331,79 @@ def ConvertDataToLearningPerforation(real_data_na, param_name, min_count_val_in_
     print('end ConvertDataToLearning')
     return [x_values, y_values, y_names]
 
+def ConvertDataToLearningPerforationStatParamsWithDiff(real_data_na, param_name, min_count_val_in_data, count_val):
+    well_name_list = real_data_na['WELL_NAME_UWI'].value_counts().index.tolist()
+    x_values = []
+    y_values = []
+    y_names = []
+    well_count = 0
+    for well_name in well_name_list:
+        if well_count % 20 == 0:
+            print(well_count, ' of ', len(well_name_list))
+        data_well = real_data_na[real_data_na['WELL_NAME_UWI'] == well_name]
+        bottom = data_well['DEPTH_BOTTOM'].tolist()[0]
+        top = data_well['DEPTH_TOP'].tolist()[0]
+        data_well_by_bound = data_well[(data_well['DEPT'] >= top) & (data_well['DEPT'] <= bottom)]
+        x_arr = data_well_by_bound['DEPT']
+        y_arr = data_well_by_bound[param_name]
+
+
+
+        # print ('length of array depth', len(x_arr))
+        # print(len(x_arr), len(y_arr))
+        if (len(x_arr) < min_count_val_in_data):
+            continue
+
+        f_spline = interpolate.interp1d(x_arr, y_arr, kind='slinear')
+        h_start = data_well_by_bound['DEPT'].min()
+        h_end = data_well_by_bound['DEPT'].max()
+        # print(h_start, h_end, top, bottom)
+        h_step = (h_end - h_start) / count_val
+        x_stat = []
+        x_temp = []
+        x_temp_diff = []
+        x_temp_diff_abs = []
+        i = 0
+        while (i < count_val):
+            x_temp.append(float(f_spline(h_start + i * h_step)))
+            i = i + 1
+
+        x_temp_diff = convert_list_to_diff(x_temp)
+        x_temp_diff_abs = list(np.abs(x_temp_diff))
+
+        [x_mean, x_std, x_a_0, x_a_std, x_a_mean_std] = calc_stat(x_temp)
+        [x_mean_d, x_std_d, x_a_0_d, x_a_std_d, x_a_mean_std_d] = calc_stat(x_temp_diff)
+        [x_mean_abs, x_std_abs, x_a_0_abs, x_a_std_abs, x_a_mean_std_abs] = calc_stat(x_temp_diff_abs)
+
+        x_stat.append(x_mean)
+        x_stat.append(x_std)
+        x_stat.append(x_a_0)
+        x_stat.append(x_a_std)
+        x_stat.append(x_a_mean_std)
+
+        x_stat.append(x_mean_d)
+        x_stat.append(x_std_d)
+        x_stat.append(x_a_0_d)
+        x_stat.append(x_a_std_d)
+        x_stat.append(x_a_mean_std_d)
+
+        x_stat.append(x_mean_abs)
+        x_stat.append(x_std_abs)
+        x_stat.append(x_a_0_abs)
+        x_stat.append(x_a_std_abs)
+        x_stat.append(x_a_mean_std_abs)
+
+
+
+        x_values.append(x_stat)
+        y_values.append(data_well['WC'].tolist()[0])
+        y_names.append(data_well['WELL_NAME'].tolist()[0])
+
+        well_count = well_count + 1
+    print('end ConvertDataToLearning')
+    return [x_values, y_values, y_names]
+
+
 
 
 
